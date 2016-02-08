@@ -1,4 +1,4 @@
-package goio
+package gobr
 
 import "encoding/json"
 

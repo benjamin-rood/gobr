@@ -6,18 +6,18 @@ import (
 	"sync"
 )
 
-type signalHub struct {
+type SignalHub struct {
 	rw        sync.RWMutex
-	receivers map[string]chan struct{} //	requires the receiver to keep track of its key as the registering party.
+	receivers map[string]chan struct{} //	requires the receiver to keep track of its key ("signature") as the registering party.
 }
 
-func newSignalHub() *signalHub {
-	h := signalHub{}
+func NewSignalHub() *SignalHub {
+	h := SignalHub{}
 	h.receivers = make(map[string]chan struct{})
 	return &h
 }
 
-func (h *signalHub) broadcast() { // therefore no blocking for any senders! 😁
+func (h *SignalHub) Broadcast() { // therefore no blocking for any senders! 😁
 	defer h.rw.Unlock()
 	h.rw.Lock()
 	for signature, channel := range h.receivers { // if map is empty then no signals get sent or lost.
@@ -26,19 +26,19 @@ func (h *signalHub) broadcast() { // therefore no blocking for any senders! 😁
 	}
 }
 
-func (h *signalHub) register(signature string) (chan struct{}, error) {
+func (h *SignalHub) Register(signature string) (chan struct{}, error) {
 	defer h.rw.Unlock()
 	h.rw.Lock()
 	_, ok := h.receivers[signature]
 	if ok {
-		return nil, errors.New("signalHub.register() failed: receiver signature already exists")
+		return nil, errors.New("SignalHub.register() failed: receiver signature already exists")
 	}
 
 	h.receivers[signature] = make(chan struct{})
 	return h.receivers[signature], nil
 }
 
-func (h *signalHub) deregister(signature string) {
+func (h *SignalHub) Deregister(signature string) {
 	defer h.rw.Unlock()
 	h.rw.Lock()
 	delete(h.receivers, signature)
