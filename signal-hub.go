@@ -3,6 +3,7 @@ package gobr
 import (
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 )
 
@@ -44,16 +45,17 @@ func (h *SignalHub) Signal(signature string) error {
 }
 
 // Register safely adds an entry to the receivers map, using the passed string signature as the map key.
-func (h *SignalHub) Register(signature string) (chan struct{}, error) {
+func (h *SignalHub) Register(signature string) (chan struct{}, bool) {
 	defer h.rw.Unlock()
 	h.rw.Lock()
-	_, ok := h.receivers[signature]
-	if ok {
-		return nil, errors.New("SignalHub.register() failed: receiver signature already exists")
+	_, clash := h.receivers[signature]
+	if clash {
+		log.Println("SignalHub.register() failed: receiver signature already exists")
+		return nil, clash
 	}
 
 	h.receivers[signature] = make(chan struct{})
-	return h.receivers[signature], nil
+	return h.receivers[signature], false
 }
 
 // Deregister safely removes an entry from the receivers map with key "signature".
