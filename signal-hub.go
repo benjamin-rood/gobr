@@ -39,7 +39,7 @@ func (h *SignalHub) Signal(signature string) error {
 	if !ok {
 		return errors.New("SignalHub.Signal() failed: receiver with key (signature string passed to method) does not exist")
 	}
-	h.receivers[signature] <- struct{}{} // this is not quite right...
+	h.receivers[signature] <- struct{}{}
 	return nil
 }
 
