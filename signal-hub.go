@@ -73,11 +73,12 @@ func (sh *SignalHub) Deregister(signature string) {
 
 // WaitForSignalOnce - single-use operation in one tidy function:
 // registers, blocks until signalled received once once, then deregisters on return.
-func WaitForSignalOnce(s string, ts *SignalHub) {
+func WaitForSignalOnce(s string, ts *SignalHub) bool {
 	defer ts.Deregister(s)
 	signal, clash := ts.Register(s)
 	if clash {
-		return
+		return true
 	}
 	<-signal // block while waiting for signal to be received.
+	return false
 }
